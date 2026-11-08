@@ -2,6 +2,7 @@ package br.com.raizesdonordeste.api.service;
 
 import br.com.raizesdonordeste.api.dto.UsuarioRequest;
 import br.com.raizesdonordeste.api.dto.UsuarioResponse;
+import br.com.raizesdonordeste.api.model.Role;
 import br.com.raizesdonordeste.api.model.Usuario;
 import br.com.raizesdonordeste.api.repository.UsuarioRepository;
 
@@ -45,7 +46,8 @@ public class UsuarioService {
         Usuario usuario = new Usuario(
                 request.nome().trim(),
                 email,
-                senhaHash
+                senhaHash,
+                Role.CLIENTE
         );
 
         Usuario usuarioSalvo = repository.save(usuario);
