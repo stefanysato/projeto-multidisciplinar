@@ -32,6 +32,9 @@ public class Usuario {
     @Column(name="criado_em", nullable = false, updatable = false)
     private final LocalDateTime criadoEm = LocalDateTime.now();
 
+    // construtor exigido pelo JPA
+    protected Usuario() {}
+
     public Usuario(String nome, String email, String senhaHash, Role role) {
         this.nome = nome;
         this.email = email;
