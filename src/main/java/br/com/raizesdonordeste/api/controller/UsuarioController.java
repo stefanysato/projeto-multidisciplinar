@@ -2,10 +2,12 @@ package br.com.raizesdonordeste.api.controller;
 
 import br.com.raizesdonordeste.api.dto.UsuarioRequest;
 import br.com.raizesdonordeste.api.dto.UsuarioResponse;
+import br.com.raizesdonordeste.api.security.UsuarioDetails;
 import br.com.raizesdonordeste.api.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,6 +41,15 @@ public class UsuarioController {
 
         return ResponseEntity.ok(service.buscarPorId(id));
 
+    }
+
+    @GetMapping("/perfil")
+    public ResponseEntity<UsuarioResponse> buscarMeuPerfil(
+            @AuthenticationPrincipal UsuarioDetails usuarioDetails) {
+
+        return ResponseEntity.ok(
+                service.buscarPorId(usuarioDetails.getId())
+        );
     }
 
     @PatchMapping("/{id}/ativar")

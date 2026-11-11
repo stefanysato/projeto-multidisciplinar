@@ -74,7 +74,13 @@ public class SecurityConfig {
                                 "/auth/login"
                         ).permitAll()
 
-                        // listar usuarios
+                        // consulta do próprio perfil pelo usuário autenticado
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/usuarios/perfil"
+                        ).authenticated()
+
+                        // listar usuários
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/usuarios", "/usuarios/**"
@@ -84,6 +90,26 @@ public class SecurityConfig {
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/usuarios/**"
+                        ).hasRole("ADMINISTRADOR")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/unidades"
+                        ).hasRole("ADMINISTRADOR")
+
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/unidades/**"
+                        ).hasRole("ADMINISTRADOR")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/unidades", "/unidades/**")
+                        .authenticated()
+
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/unidades/**"
                         ).hasRole("ADMINISTRADOR")
 
                         .anyRequest().authenticated()
