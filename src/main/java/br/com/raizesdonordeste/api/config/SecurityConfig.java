@@ -62,55 +62,73 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        // cadastro de clientes
+                        // USUÁRIOS
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/usuarios"
                         ).permitAll()
-
-                        // login
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/auth/login"
                         ).permitAll()
-
-                        // consulta do próprio perfil pelo usuário autenticado
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/usuarios/perfil"
                         ).authenticated()
-
-                        // listar usuários
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/usuarios", "/usuarios/**"
                         ).hasRole("ADMINISTRADOR")
-
-                        // ativar/desativar usuario
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/usuarios/**"
                         ).hasRole("ADMINISTRADOR")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/usuarios/funcionarios"
+                        ).hasRole("ADMINISTRADOR")
 
+                        //ESTOQUE
+                        .requestMatchers(
+                                "/estoque/**"
+                        ).hasAnyRole("GERENTE", "ADMINISTRADOR")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/unidades/*/estoque"
+                        ).hasAnyRole("GERENTE", "ADMINISTRADOR")
+
+                        // UNIDADES
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/unidades"
                         ).hasRole("ADMINISTRADOR")
-
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/unidades/**"
                         ).hasRole("ADMINISTRADOR")
-
+                        .requestMatchers(
+                                HttpMethod.PUT,
+                                "/unidades/**"
+                        ).hasRole("ADMINISTRADOR")
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/unidades", "/unidades/**")
                         .authenticated()
 
-                        .requestMatchers(
-                                HttpMethod.PUT,
-                                "/unidades/**"
-                        ).hasRole("ADMINISTRADOR")
+
+                        // PRODUTOS
+                        .requestMatchers(HttpMethod.POST, "/produtos")
+                            .hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.PUT, "/produtos/**")
+                            .hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.PATCH, "/produtos/**")
+                            .hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.GET, "/produtos", "/produtos/**")
+                            .authenticated()
+
+                        // PEDIDOS
+                        .requestMatchers("/pedidos/**")
+                            .authenticated()
 
                         .anyRequest().authenticated()
                 )

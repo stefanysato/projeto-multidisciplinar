@@ -1,5 +1,7 @@
 package br.com.raizesdonordeste.api.controller;
 
+import br.com.raizesdonordeste.api.dto.FuncionarioRequest;
+import br.com.raizesdonordeste.api.dto.FuncionarioResponse;
 import br.com.raizesdonordeste.api.dto.UsuarioRequest;
 import br.com.raizesdonordeste.api.dto.UsuarioResponse;
 import br.com.raizesdonordeste.api.security.UsuarioDetails;
@@ -31,9 +33,20 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
     }
 
+    @PostMapping("/funcionarios")
+    public ResponseEntity<FuncionarioResponse> cadastrarFuncionario(
+            @Valid @RequestBody FuncionarioRequest request
+    ) {
+        FuncionarioResponse funcionario = service.cadastrarFuncionario(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(funcionario);
+    }
+
     @GetMapping
     public ResponseEntity<List<UsuarioResponse>> listarTodos() {
-        return ResponseEntity.ok(service.listarTodos());
+        return ResponseEntity.ok(service.listarUsuarios());
     }
 
     @GetMapping("/{id}")

@@ -9,6 +9,10 @@ import java.util.Objects;
 @Table(name="usuarios")
 public class Usuario {
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "unidade_id")
+    private Unidade unidade;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,12 +39,26 @@ public class Usuario {
     // construtor exigido pelo JPA
     protected Usuario() {}
 
-    public Usuario(String nome, String email, String senhaHash, Role role) {
+    // cadastro clientes
+    public Usuario(
+            String nome,
+            String email,
+            String senhaHash,
+            Role role
+    ) {
+        this(nome, email, senhaHash, role, null);
+    }
+
+    // cadastro funcionários
+    public Usuario(String nome, String email, String senhaHash, Role role, Unidade unidade) {
         this.nome = nome;
         this.email = email;
         this.senhaHash = senhaHash;
-        this.role = Objects.requireNonNull(role, "O perfil do usuário é obrigatório");
+        this.role = role;
+        this.unidade = unidade;
     }
+
+    public Unidade getUnidade() { return unidade; }
 
     public Long getId() {
         return id;

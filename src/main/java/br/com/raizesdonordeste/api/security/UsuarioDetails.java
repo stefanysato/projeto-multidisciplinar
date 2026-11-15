@@ -1,5 +1,6 @@
 package br.com.raizesdonordeste.api.security;
 
+import br.com.raizesdonordeste.api.model.Role;
 import br.com.raizesdonordeste.api.model.Usuario;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
@@ -57,6 +58,14 @@ public class UsuarioDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return usuario.isAtivo();
+    }
+
+    public Role getRole() { return usuario.getRole(); }
+
+    public Long getUnidadeId() {
+        return usuario.getUnidade() != null
+                ? usuario.getUnidade().getId()
+                : null;
     }
 
 }

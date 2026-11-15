@@ -41,7 +41,7 @@ public class UnidadeService {
     }
 
     @Transactional(readOnly = true)
-    public List<UnidadeResponse> listarTodas() {
+    public List<UnidadeResponse> listarUnidades() {
         return repository.findAll()
                 .stream()
                 .map(this::converterParaResponse)

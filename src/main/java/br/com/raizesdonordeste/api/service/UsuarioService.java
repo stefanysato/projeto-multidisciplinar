@@ -1,9 +1,13 @@
 package br.com.raizesdonordeste.api.service;
 
+import br.com.raizesdonordeste.api.dto.FuncionarioRequest;
+import br.com.raizesdonordeste.api.dto.FuncionarioResponse;
 import br.com.raizesdonordeste.api.dto.UsuarioRequest;
 import br.com.raizesdonordeste.api.dto.UsuarioResponse;
 import br.com.raizesdonordeste.api.model.Role;
+import br.com.raizesdonordeste.api.model.Unidade;
 import br.com.raizesdonordeste.api.model.Usuario;
+import br.com.raizesdonordeste.api.repository.UnidadeRepository;
 import br.com.raizesdonordeste.api.repository.UsuarioRepository;
 
 import org.springframework.http.HttpStatus;
@@ -18,12 +22,14 @@ import java.util.Locale;
 @Service
 public class UsuarioService {
 
-    private final UsuarioRepository repository;
+    private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder encoder;
+    private final UnidadeRepository unidadeRepository;
 
-    public UsuarioService(UsuarioRepository repository, PasswordEncoder encoder) {
-        this.repository = repository;
+    public UsuarioService(UsuarioRepository repository, PasswordEncoder encoder, UnidadeRepository unidadeRepository) {
+        this.usuarioRepository = repository;
         this.encoder = encoder;
+        this.unidadeRepository = unidadeRepository;
     }
 
     @Transactional
@@ -32,10 +38,10 @@ public class UsuarioService {
         String email = request.email().trim().toLowerCase(Locale.ROOT);
 
         // Verifica se já existe uma conta com o e-mail informado
-        if (repository.existsByEmailIgnoreCase(email)) {
+        if (usuarioRepository.existsByEmailIgnoreCase(email)) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Este e-mail já está cadastrado"
+                    "Este e-mail já está cadastrado."
             );
         }
 
@@ -50,14 +56,62 @@ public class UsuarioService {
                 Role.CLIENTE
         );
 
-        Usuario usuarioSalvo = repository.save(usuario);
+        Usuario usuarioSalvo = usuarioRepository.save(usuario);
 
         return converterParaResponse(usuarioSalvo);
     }
 
+    @Transactional
+    public FuncionarioResponse cadastrarFuncionario(FuncionarioRequest request) {
+        if (request.role() != Role.ATENDENTE
+                && request.role() != Role.COZINHA
+                && request.role() != Role.GERENTE) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Perfil inválido para cadastro de funcionário."
+            );
+        }
+        String email = request.email().trim().toLowerCase();
+
+        if (usuarioRepository.existsByEmailIgnoreCase(email)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Este e-mail já está cadastrado."
+            );
+        }
+
+        Unidade unidade = unidadeRepository.findById(request.unidadeId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Unidade não encontrada."
+                ));
+
+        if (!unidade.isAtiva()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Não é possível associar funcionários a uma unidade inativa."
+            );
+        }
+
+        String senhaHash = encoder.encode(request.senha());
+
+        Usuario usuario = new Usuario(
+                request.nome().trim(),
+                email,
+                senhaHash,
+                request.role(),
+                unidade
+        );
+
+        Usuario salvo = usuarioRepository.save(usuario);
+
+        return converterParaFuncionarioResponse(salvo);
+    }
+
     @Transactional(readOnly = true)
-    public List<UsuarioResponse> listarTodos() {
-        List<Usuario> usuarios = repository.findAll();
+    public List<UsuarioResponse> listarUsuarios() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
 
         return usuarios.stream()
                 .map(this::converterParaResponse)
@@ -65,7 +119,7 @@ public class UsuarioService {
     }
 
     private Usuario buscarEntidadePorId(Long id) {
-        return repository.findById(id)
+        return usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Usuário não encontrado"
@@ -98,6 +152,21 @@ public class UsuarioService {
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),
+                usuario.isAtivo(),
+                usuario.getCriadoEm()
+        );
+    }
+
+    private FuncionarioResponse converterParaFuncionarioResponse(
+            Usuario usuario
+    ) {
+        return new FuncionarioResponse(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getEmail(),
+                usuario.getRole(),
+                usuario.getUnidade().getId(),
+                usuario.getUnidade().getNome(),
                 usuario.isAtivo(),
                 usuario.getCriadoEm()
         );

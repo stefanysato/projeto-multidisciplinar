@@ -2,7 +2,6 @@ package br.com.raizesdonordeste.api.controller;
 
 import br.com.raizesdonordeste.api.dto.UnidadeRequest;
 import br.com.raizesdonordeste.api.dto.UnidadeResponse;
-import br.com.raizesdonordeste.api.model.Unidade;
 import br.com.raizesdonordeste.api.service.UnidadeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -31,7 +30,7 @@ public class UnidadeController {
 
     @GetMapping
     public ResponseEntity<List<UnidadeResponse>> listarTodas() {
-        return ResponseEntity.ok(service.listarTodas());
+        return ResponseEntity.ok(service.listarUnidades());
     }
 
     @GetMapping("/{id}")
