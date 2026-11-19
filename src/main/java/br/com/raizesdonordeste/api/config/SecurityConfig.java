@@ -130,6 +130,8 @@ public class SecurityConfig {
                         .requestMatchers("/pedidos/**")
                             .authenticated()
 
+                        .requestMatchers("/fidelidade/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
 

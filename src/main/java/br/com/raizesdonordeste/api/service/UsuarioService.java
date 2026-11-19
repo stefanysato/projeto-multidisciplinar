@@ -4,9 +4,11 @@ import br.com.raizesdonordeste.api.dto.FuncionarioRequest;
 import br.com.raizesdonordeste.api.dto.FuncionarioResponse;
 import br.com.raizesdonordeste.api.dto.UsuarioRequest;
 import br.com.raizesdonordeste.api.dto.UsuarioResponse;
+import br.com.raizesdonordeste.api.model.ContaFidelidade;
 import br.com.raizesdonordeste.api.model.Role;
 import br.com.raizesdonordeste.api.model.Unidade;
 import br.com.raizesdonordeste.api.model.Usuario;
+import br.com.raizesdonordeste.api.repository.ContaFidelidadeRepository;
 import br.com.raizesdonordeste.api.repository.UnidadeRepository;
 import br.com.raizesdonordeste.api.repository.UsuarioRepository;
 
@@ -23,13 +25,20 @@ import java.util.Locale;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder encoder;
     private final UnidadeRepository unidadeRepository;
+    private final ContaFidelidadeRepository contaFidelidadeRepository;
+    private final PasswordEncoder encoder;
 
-    public UsuarioService(UsuarioRepository repository, PasswordEncoder encoder, UnidadeRepository unidadeRepository) {
+    public UsuarioService(
+            UsuarioRepository repository,
+            UnidadeRepository unidadeRepository,
+            ContaFidelidadeRepository contaFidelidadeRepository,
+            PasswordEncoder encoder
+    ) {
         this.usuarioRepository = repository;
-        this.encoder = encoder;
         this.unidadeRepository = unidadeRepository;
+        this.contaFidelidadeRepository = contaFidelidadeRepository;
+        this.encoder = encoder;
     }
 
     @Transactional
@@ -57,6 +66,9 @@ public class UsuarioService {
         );
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
+
+        ContaFidelidade conta = new ContaFidelidade(usuarioSalvo);
+        contaFidelidadeRepository.save(conta);
 
         return converterParaResponse(usuarioSalvo);
     }
