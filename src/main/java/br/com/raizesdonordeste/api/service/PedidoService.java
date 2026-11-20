@@ -4,10 +4,7 @@ import br.com.raizesdonordeste.api.dto.ItemPedidoResponse;
 import br.com.raizesdonordeste.api.dto.PedidoRequest;
 import br.com.raizesdonordeste.api.dto.PedidoResponse;
 import br.com.raizesdonordeste.api.model.*;
-import br.com.raizesdonordeste.api.repository.EstoqueUnidadeRepository;
-import br.com.raizesdonordeste.api.repository.PedidoRepository;
-import br.com.raizesdonordeste.api.repository.UnidadeRepository;
-import br.com.raizesdonordeste.api.repository.UsuarioRepository;
+import br.com.raizesdonordeste.api.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,17 +21,20 @@ public class PedidoService {
     private final UnidadeRepository unidadeRepository;
     private final EstoqueUnidadeRepository estoqueUnidadeRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ContaFidelidadeRepository  contaFidelidadeRepository;
 
     public PedidoService(
             PedidoRepository pedidoRepository,
             UnidadeRepository unidadeRepository,
             EstoqueUnidadeRepository estoqueUnidadeRepository,
-            UsuarioRepository usuarioRepository
+            UsuarioRepository usuarioRepository,
+            ContaFidelidadeRepository contaFidelidadeRepository
     ) {
         this.pedidoRepository = pedidoRepository;
         this.unidadeRepository = unidadeRepository;
         this.estoqueUnidadeRepository = estoqueUnidadeRepository;
         this.usuarioRepository =  usuarioRepository;
+        this.contaFidelidadeRepository = contaFidelidadeRepository;
     }
 
 
@@ -52,6 +52,16 @@ public class PedidoService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Usuário não encontrado."
                 ));
+
+        ContaFidelidade contaFidelidade = null;
+
+        if (registradoPor.getRole() == Role.CLIENTE) {
+            contaFidelidade = contaFidelidadeRepository
+                    .findByTitular_Id(registradoPor.getId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Conta de fidelidade do cliente não encontrada"
+                    ));
+        }
 
         // agrupa os produtos repetidos
         Map<Long, Integer> quantidadesPorProduto = new HashMap<>();
@@ -90,7 +100,7 @@ public class PedidoService {
         Pedido pedido = new Pedido(
                 unidade,
                 registradoPor,
-                null,
+                contaFidelidade,
                 request.canal()
         );
 
